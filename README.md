@@ -220,5 +220,7 @@ ids.json
 ---
 
 # ❤️ Author
+
 Created and maintained by **Fityan Aula J**
+
 If this project helps you, feel free to ⭐ the repository.
