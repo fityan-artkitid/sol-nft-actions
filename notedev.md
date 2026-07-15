@@ -1,1 +1,0 @@
-https://learn.blueshift.gg/en/perks -> generate faucet

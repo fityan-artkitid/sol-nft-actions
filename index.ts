@@ -7,8 +7,7 @@ import { generateSigner, keypairIdentity, publicKey } from '@metaplex-foundation
 import * as fs from 'fs'
 
 // Initialize UMI
-const umi = createUmi('https://api.devnet.solana.com')
-//   .use(mplCore())
+const umi = createUmi('http://127.0.0.1:8899').use(mplCore())
 // const umi = createUmi("http://34.128.75.160:8899").use(mplCore());
 
 // 2. Load wallet kamu untuk bayar transaksi (Pastikan id.json sudah ada dan berisi SOL Devnet)

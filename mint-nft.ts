@@ -78,8 +78,9 @@ const nftList = [
 
 async function mintMultipleAssets() {
   // 1. Inisialisasi Umi & aktifkan plugin Metaplex Core
-  const umi = createUmi("https://api.devnet.solana.com").use(mplCore());
+  // const umi = createUmi("https://api.devnet.solana.com").use(mplCore());
   // const umi = createUmi("http://34.128.75.160:8899").use(mplCore());
+  const umi = createUmi("http://127.0.0.1:8899").use(mplCore());
 
   // 2. Baca file ids.json secara lokal (Byte Array) sebagai wallet penandatangan
   const walletSecretKey = JSON.parse(fs.readFileSync("./ids.json", "utf-8"));
@@ -95,7 +96,7 @@ async function mintMultipleAssets() {
 
   // 3. Masukkan Alamat Akun Koleksi (Collection Address) hasil dari create collection
   const collectionAddress = publicKey(
-    "H83wCkp6E8XAZcM9GRDuwPc4g7QGGFVHopUaEhnU2WBR",
+    "8ghCYzMZgRuDQ3YiFbE85yTckNzXYvDuKWyrxeCVdwEK",
   );
 
   try {
