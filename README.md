@@ -1,113 +1,224 @@
-Berikut adalah kode *markdown* lengkap yang siap kamu *copy-paste* langsung ke file `README.md` kamu.
-
-*(Tips: Arahkan kursor ke pojok kanan atas blok kode di bawah ini, lalu klik tombol **Copy**)*
-
-```markdown
 # 🚀 Solana NFT Collection Generator
 
-Repositori ini berisi skrip untuk membuat *collection* dan melakukan *minting* NFT di jaringan Solana. Ikuti panduan di bawah ini untuk memulai.
+A simple toolkit for creating NFT Collections and minting NFTs on the Solana blockchain using Metaplex Core.
 
 ---
 
-## 🔗 Link Penting
+## ✨ Features
 
-Sebelum memulai, pastikan kamu sudah memiliki *faucet* (saldo devnet/testnet) yang cukup untuk membayar *gas fee*:
-
-* [Blueshift Perks (Generate Faucet)](https://learn.blueshift.gg/en/perks)
-* [Solana Faucet](https://faucet.solana.com/)
+- Create NFT Collection
+- Mint NFTs into an existing Collection
+- Initialize project configuration
+- Compatible with Metaplex Core
 
 ---
 
-## 🛠️ Alur & Cara Kerja (Workflow)
+## 📋 Prerequisites
 
-Ikuti langkah-langkah berikut secara berurutan untuk menjalankan projek:
+Before getting started, make sure you have:
 
-### 1. Setup Wallet
-Buat *keypair wallet* baru yang akan digunakan sebagai pendana (*payer*) untuk membayar *gas fee* dan biaya pembuatan NFT. Simpan file *keypair* tersebut di **root folder** projek dengan nama `ids.json`.
+- Node.js (v18 or later recommended)
+- A Solana wallet keypair
+- Devnet SOL for transaction fees
 
-> ⚠️ **PENTING:** Jangan pernah menaruh `ids.json` ke dalam *public repository*. Pastikan file ini sudah terdaftar di `.gitignore` kamu.
+You can get free Devnet SOL from:
 
-### 2. Upload Metadata
-Siapkan *file* gambar dan metadata NFT kamu, lalu unggah (*upload*) ke Arweave, IPFS, atau *storage blockchain* lainnya untuk mendapatkan URL metadatanya.
+- 🔹 https://learn.blueshift.gg/en/perks
+- 🔹 https://faucet.solana.com/
 
-### 3. Membuat Collection
-Jalankan skrip `index.ts` untuk membuat *Collection NFT* utama terlebih dahulu.
-```bash
-npx ts-node-esm index.ts
+---
+
+# 🛠 Workflow
+
+Follow these steps in order.
+
+## 1. Create a Wallet
+
+Generate a new Solana keypair that will act as the payer for all transactions.
+
+Save your keypair as:
 
 ```
+ids.json
+```
 
-### 4. Minting NFT
+inside the project root.
 
-* Salin **Public Key (Pubkey)** hasil dari pembuatan *collection* di langkah ke-3.
-* Buka file `mint-nft.ts`, lalu masukkan *pubkey collection* tersebut ke bagian yang sesuai.
-* Siapkan metadata JSON untuk NFT yang akan di-*mint* (pastikan sudah di-upload ke Arweave/storage).
-* Jalankan skrip *minting*:
+> ⚠️ **Important**
+>
+> Never commit `ids.json` to GitHub.
+> Make sure it is included in your `.gitignore`.
+
+---
+
+## 2. Upload Your NFT Metadata
+
+Before minting, upload your assets to decentralized storage such as:
+
+- Arweave
+- IPFS
+- Other permanent storage providers
+
+Prepare:
+
+- NFT image
+- Collection image
+- Metadata JSON
+
+After uploading, copy the metadata URLs.
+
+---
+
+## 3. Create the NFT Collection
+
+Run:
+
+```bash
+npx ts-node-esm index.ts
+```
+
+After the script finishes, save the generated **Collection Public Key**.
+
+You'll need it in the next step.
+
+---
+
+## 4. Mint NFTs
+
+Open:
+
+```
+mint-nft.ts
+```
+
+Update the following values:
+
+- Collection Public Key
+- Metadata URI
+
+Then run:
 
 ```bash
 npx ts-node-esm mint-nft.ts
-
 ```
 
-### 5. Inisialisasi Projek
-
-Langkah terakhir, daftarkan projek kamu menggunakan skrip `init-project.ts`.
-
-```bash
-npx ts-node-esm init-project.ts
-
-```
+Repeat this step for each NFT you want to mint.
 
 ---
 
-## 📄 Sampel JSON Metadata
+## 5. Initialize the Project
 
-Berikut adalah contoh format struktur JSON untuk *Collection* dan *NFT Individual* yang perlu disiapkan di *storage* (seperti Arweave):
+Finally, register your project by running:
 
-### 📁 Metadata Collection
+```bash
+npx ts-node-esm init-project.ts
+```
+
+Your project is now ready.
+
+---
+
+# 📄 Metadata Examples
+
+## Collection Metadata
 
 ```json
 {
   "name": "Snakehead Story by Bos Choko",
   "symbol": "BOSC",
   "description": "Bos Choko is a trusted seller specializing in premium Channa fish feed, committed to building the ultimate global Channa community. Hold exclusive Bos Choko NFTs to unlock premium community rewards, loyalty benefits, and real-world utility as part of our growing ecosystem.",
-  "image": "[https://qtn26tsf2thtai5z6r22zakmzk5swb2dgwitdkoru7piffmjtxiq.turbo-gateway.com/hNuvTkXUzzAjufR1rIFMyrsrB0M1kTGp0afegpWJndE](https://qtn26tsf2thtai5z6r22zakmzk5swb2dgwitdkoru7piffmjtxiq.turbo-gateway.com/hNuvTkXUzzAjufR1rIFMyrsrB0M1kTGp0afegpWJndE)?",
-  "external_url": "[https://artkit.io](https://artkit.io)",
+  "image": "https://YOUR_COLLECTION_IMAGE_URL",
+  "external_url": "https://artkit.io",
   "attributes": []
 }
-
 ```
 
-### 🖼️ Metadata NFT Individual
+---
+
+## NFT Metadata
 
 ```json
 {
   "name": "Bos Choko #1",
   "symbol": "BOSC",
   "description": "Bos Choko is a trusted seller specializing in premium Channa fish feed, committed to building the ultimate global Channa community. Hold exclusive Bos Choko NFTs to unlock premium community rewards, loyalty benefits, and real-world utility as part of our growing ecosystem.",
-  "image": "[https://turbo-gateway.com/6LJLG2WLo0FGPMfmtt_4u7vlJFL-M_b11_MPTH-O-ek](https://turbo-gateway.com/6LJLG2WLo0FGPMfmtt_4u7vlJFL-M_b11_MPTH-O-ek)",
-  "external_url": "[https://artkit.io](https://artkit.io)",
+  "image": "https://YOUR_NFT_IMAGE_URL",
+  "external_url": "https://artkit.io",
   "attributes": [
-    { "trait_type": "Class", "value": "Challenger" },
-    { "trait_type": "Background", "value": "Clear Water Aquascape" },
-    { "trait_type": "Species", "value": "Barca" },
-    { "trait_type": "Mental", "value": "Normal" },
-    { "trait_type": "Eye", "value": "Red Eye" },
-    { "trait_type": "Fin Type", "value": "Semi-highfin" },
-    { "trait_type": "Body Pattern", "value": "Sparse Dots" },
-    { "trait_type": "Bars", "value": "No Bar" },
-    { "trait_type": "Base Fish Body", "value": "Normal" }
+    {
+      "trait_type": "Class",
+      "value": "Challenger"
+    },
+    {
+      "trait_type": "Background",
+      "value": "Clear Water Aquascape"
+    },
+    {
+      "trait_type": "Species",
+      "value": "Barca"
+    },
+    {
+      "trait_type": "Mental",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "Eye",
+      "value": "Red Eye"
+    },
+    {
+      "trait_type": "Fin Type",
+      "value": "Semi-highfin"
+    },
+    {
+      "trait_type": "Body Pattern",
+      "value": "Sparse Dots"
+    },
+    {
+      "trait_type": "Bars",
+      "value": "No Bar"
+    },
+    {
+      "trait_type": "Base Fish Body",
+      "value": "Normal"
+    }
   ]
 }
-
 ```
 
 ---
 
-## 🧑‍💻 Author
-
-Created and maintained with ❤️ by **Fityan Aula J**
+# 📁 Project Structure
 
 ```
-
+.
+├── index.ts              # Create NFT Collection
+├── mint-nft.ts           # Mint NFT into Collection
+├── init-project.ts       # Initialize project
+├── ids.json              # Wallet keypair (DO NOT COMMIT)
+└── README.md
 ```
+
+---
+
+# ⚠️ Security
+
+Never expose or commit:
+
+- `ids.json`
+- Private Keys
+- Secret Recovery Phrases
+
+Always add them to your `.gitignore`.
+
+Example:
+
+```gitignore
+ids.json
+.env
+```
+
+---
+
+# ❤️ Author
+Created and maintained by **Fityan Aula J**
+If this project helps you, feel free to ⭐ the repository.
