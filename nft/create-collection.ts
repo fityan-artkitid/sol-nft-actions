@@ -5,6 +5,8 @@ import { createCollection, ruleSet } from '@metaplex-foundation/mpl-core'
 import { mplCore } from '@metaplex-foundation/mpl-core'
 import { generateSigner, keypairIdentity, publicKey } from '@metaplex-foundation/umi'
 import * as fs from 'fs'
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 // Initialize UMI
   const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";

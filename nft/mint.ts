@@ -10,6 +10,8 @@ import {
   keypairIdentity,
 } from "@metaplex-foundation/umi";
 import * as fs from "fs";
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 // 🌟 DAFTAR LINK JSON METADATA DARI TURBO GATEWAY
 // Kamu tinggal tambahkan item baru di dalam array ini sesuai kebutuhan
@@ -96,9 +98,7 @@ async function mintMultipleAssets() {
   );
 
   // 3. Masukkan Alamat Akun Koleksi (Collection Address) hasil dari create collection
-  const collectionAddress = publicKey(
-    "8iAoQwkXsnRKm6WunbUzp6nRMYdiS7vRUVSH68rDvZH3",
-  );
+  const collectionAddress = publicKey(process.env.NEXT_PUBLIC_COLLECTION_ADDRESS || "");
 
   try {
     console.log("Mengambil data koleksi dari blockchain...");

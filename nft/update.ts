@@ -6,6 +6,8 @@ import {
   keypairIdentity,
 } from "@metaplex-foundation/umi";
 import fs from "fs";
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 // 1. Inisialisasi Umi
   const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";

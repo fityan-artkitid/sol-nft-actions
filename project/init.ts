@@ -4,6 +4,8 @@ import { PublicKey, SystemProgram, Connection, Keypair } from "@solana/web3.js";
 import * as fs from "fs";
 import BN from "bn.js";
 import idl from "../artkit_stake_v1.json" with { type: "json" };
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 // CODE INI AKAN GENERATE "Alamat PDA Config Projekmu" JADI DISINI TEMPAT NAMPUNG POOL DARI BAGI BAGI REWARD. TF KE SINI, PER PROJECT BEDA.
 
@@ -12,9 +14,7 @@ async function run() {
     const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";
     const projectId = "boschoko99"; // INI BIKIN AJA NGASAL, HARUS UNIK TAPI
     // NFT COLLECTION ADDRESSNYA
-    const nftCollectionMint = new PublicKey(
-        "8iAoQwkXsnRKm6WunbUzp6nRMYdiS7vRUVSH68rDvZH3",
-    );
+    const nftCollectionMint = new PublicKey(process.env.NEXT_PUBLIC_COLLECTION_ADDRESS || "");
 
     const connection = new Connection(RPC_ENDPOINT, "confirmed");
 

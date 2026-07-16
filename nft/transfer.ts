@@ -2,6 +2,8 @@ import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { mplCore, transferV1 } from "@metaplex-foundation/mpl-core";
 import { publicKey, keypairIdentity } from "@metaplex-foundation/umi";
 import * as fs from "fs";
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 async function transferNFT() {
   // 1. Inisialisasi Umi menuju custom localnet kamu
@@ -13,10 +15,11 @@ async function transferNFT() {
   const walletKeypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(walletSecretKey));
   umi.use(keypairIdentity(walletKeypair));
 
+  console.log("process.env.NEXT_PUBLIC_COLLECTION_ADDRESS " +process.env.NEXT_PUBLIC_COLLECTION_ADDRESS)
   // 3. Definisikan alamat NFT dan alamat wallet tujuan
-  const assetAddress = publicKey("7WZQHDWPxzExVT12m1rnB2Cr5BZMHP9m3u87qMb5st6R");
+  const assetAddress = publicKey("6dJ2CPuFKnDKeqGyATRzucVwgHvXGwuPZyUrBCXi8g2i");
   const destinationWallet = publicKey("4LSSc5UkLigkVVZCtrrLS9ePu4ApeWFueQo6ztqk3pHM");
-  const collectionAddress = publicKey("8ghCYzMZgRuDQ3YiFbE85yTckNzXYvDuKWyrxeCVdwEK");
+  const collectionAddress = publicKey(process.env.NEXT_PUBLIC_COLLECTION_ADDRESS || "");
 
   console.log("Memulai proses transfer...");
 

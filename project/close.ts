@@ -3,7 +3,8 @@ import { Program, AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { PublicKey, Connection, Keypair } from "@solana/web3.js";
 import * as fs from "fs";
 import idl from "../artkit_stake_v1.json" with { type: "json" };
-import { getEnvironmentData } from "worker_threads";
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 async function run() {
     const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";

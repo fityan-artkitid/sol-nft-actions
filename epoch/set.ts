@@ -4,10 +4,12 @@ import { PublicKey, SystemProgram, Connection, Keypair } from "@solana/web3.js";
 import * as fs from "fs";
 import BN from "bn.js";
 import idl from "../artkit_stake_v1.json" with { type: "json" };
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 async function run() {
     // 1. Parameter Jaringan & Konfigurasi Ekosistem
-    const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";
+    const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "";
     const connection = new Connection(RPC_ENDPOINT, "confirmed");
     
     // Identitas Tenant/Proyek

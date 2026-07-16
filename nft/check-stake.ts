@@ -1,80 +1,103 @@
+// execute: npx ts-node-esm project/check-state.ts
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { mplCore } from "@metaplex-foundation/mpl-core";
 import { publicKey, keypairIdentity } from "@metaplex-foundation/umi";
-import { PublicKey } from "@solana/web3.js"; // Tetap pakai web3.js khusus untuk findProgramAddressSync bawaan Solana
+import { PublicKey } from "@solana/web3.js";
+import { BorshAccountsCoder } from "@coral-xyz/anchor";
 import * as fs from "fs";
+import * as dotenv from "dotenv";
+import idl from "../artkit_stake_v1.json" with { type: "json" };
+
+dotenv.config({ path: ".env" });
 
 async function checkStakeStatusUmi() {
-  // 1. Inisialisasi Umi menuju custom localnet proxy kamu
+  // 🔍 Ganti dengan alamat mint NFT Core yang mau lu cek secara live
+  const NFT_ASSET_ADDRESS = new PublicKey("6dJ2CPuFKnDKeqGyATRzucVwgHvXGwuPZyUrBCXi8g2i");
+
   const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";
   const umi = createUmi(RPC_ENDPOINT).use(mplCore());
 
-  // 2. Load wallet penanda tangan (Identity)
   const walletSecretKey = JSON.parse(fs.readFileSync("./ids.json", "utf-8"));
   const walletKeypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(walletSecretKey));
   umi.use(keypairIdentity(walletKeypair));
 
-  // 3. Masukkan Program ID Staking Anchor & Alamat Mint NFT Core kamu
-  const PROGRAM_ID = new PublicKey("7pBtkDwArvZiqC7hgt7cM5VYaFxXXhpA9szQjZm9H3pA");
-  const NFT_ASSET_ADDRESS = new PublicKey("6fspXZ5b3F8jbZMQTXP6aYFn12eoudtLaAg7FQX8Wek7");
+  const PROGRAM_ID = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID || idl.address);
 
-  // 4. Hitung alamat PDA secara matematis sesuai aturan seed di Rust: [b"stake", asset_pubkey]
+  // 1. Hitung PDA StakeState
   const [stakeStatePDA] = PublicKey.findProgramAddressSync(
     [Buffer.from("stake"), NFT_ASSET_ADDRESS.toBuffer()],
     PROGRAM_ID
   );
 
-  const pdaUmiPublicKey = publicKey(stakeStatePDA.toBase58());
+  // 2. Hitung PDA UserClaimTracker Permanen
+  const [claimTrackerPDA] = PublicKey.findProgramAddressSync(
+    [Buffer.from("claim_tracker"), NFT_ASSET_ADDRESS.toBuffer()],
+    PROGRAM_ID
+  );
 
-  console.log(`==================================================`);
-  console.log(`🔎 NFT Asset: ${NFT_ASSET_ADDRESS.toString()}`);
-  console.log(`📍 Alamat PDA Terhitung: ${pdaUmiPublicKey}`);
-  console.log(`==================================================\n`);
+  const coder = new BorshAccountsCoder(idl as any);
+  
+  // Fungsi helper untuk merapikan teks alfabet (Tanpa diganggu emoji)
+  const p = (txt: string) => txt.padEnd(25, " ");
+
+  console.log(`=======================================================`);
+  console.log(`🔍 ${p("NFT Asset")} : ${NFT_ASSET_ADDRESS.toString()}`);
+  console.log(`📍 ${p("PDA StakeState")} : ${stakeStatePDA.toBase58()}`);
+  console.log(`📍 ${p("PDA ClaimTracker")} : ${claimTrackerPDA.toBase58()}`);
+  console.log(`=======================================================\n`);
 
   try {
-    // 5. Cek eksistensi akun PDA lewat RPC Umi
-    const account = await umi.rpc.getAccount(pdaUmiPublicKey);
+    const stakeAccount = await umi.rpc.getAccount(publicKey(stakeStatePDA.toBase58()));
 
-    if (!account.exists) {
-      console.log("🔓 STATUS: NFT INI TIDAK SEDANG DI-STAKE (PDA tidak ditemukan di Blockchain).");
-    } else {
-      console.log("🔒 STATUS: NFT INI SEDANG DI-STAKE!");
-      console.log(`💰 Saldo SOL di dalam PDA: ${Number(account.lamports.basisPoints) / 1e9} SOL`);
-      console.log(`🤖 Program Owner yang memegang PDA: ${account.owner}\n`);
-      
-      // 6. Melakukan manual slicing data byte array untuk mengambil stake_start_time
-      // Struktur Data StakeState kamu di Rust:
-      // Offset 0-7  (8 bytes)  : Anchor Discriminator
-      // Offset 8-39 (32 bytes) : Owner Pubkey
-      // Offset 40-71(32 bytes) : Asset Pubkey
-      // Offset 72-79(8 bytes)  : stake_start_time (i64 timestamp)
-      
-      const dataBuffer = Buffer.from(account.data);
-      
-      // Ambil Owner Public Key dari buffer byte (offset 8 sampai 40)
-      const ownerBytes = dataBuffer.subarray(8, 40);
-      const ownerPubkey = new PublicKey(ownerBytes).toString();
-      
-      // Ambil Timestamp i64 dari buffer byte (offset 72 sampai 80) dalam format Little Endian
-      const timestampBytes = dataBuffer.subarray(72, 80);
-      const stakeStartTimeBigInt = timestampBytes.readBigInt64LE(0);
-      const stakeStartTimeSeconds = Number(stakeStartTimeBigInt);
-
-      // Hitung kalkulasi perkiraan reward berjalan secara live untuk simulasi
-      const jamSekarangSeconds = Math.floor(Date.now() / 1000);
-      const durasiDetik = jamSekarangSeconds - stakeStartTimeSeconds;
-      const durasiHari = durasiDetik / (24 * 60 * 60);
-      const rateRewardPerHari = 0.002; // Sesuai display UI kamu
-      const akumulasiReward = durasiHari * rateRewardPerHari;
-
-      console.log("📄 PARSING DATA DARI PDA VIA UMI BUFFER:");
-      console.log(`   - Wallet Pemilik Sah   : ${ownerPubkey}`);
-      console.log(`   - Jam Mulai Staking    : ${new Date(stakeStartTimeSeconds * 1000).toLocaleString()}`);
-      console.log(`   - Total Waktu Berjalan : ${durasiDetik} detik (~${durasiHari.toFixed(4)} hari)`);
-      console.log(`   - Live Reward Earning  : ${akumulasiReward.toFixed(6)} SOL`);
+    if (!stakeAccount.exists) {
+      console.log("🔓 STATUS: NFT INI TIDAK SEDANG DI-STAKE (PDA tidak ditemukan).");
+      return;
     }
+
+    // Decode Data Akun StakeState
+    const decodedStake: any = coder.decode("StakeState", Buffer.from(stakeAccount.data));
+    
+    console.log("🔒 STATUS                    : NFT INI SEDANG DI-STAKE!");
+    console.log(`-------------------------------------------------------`);
+    console.log(`📦 ${p("Project ID Bind")} : ${decodedStake.projectId || decodedStake.project_id}`);
+    console.log(`👑 ${p("Wallet Pemilik Sah")} : ${(decodedStake.owner as PublicKey).toBase58()}`);
+    console.log(`🎯 ${p("Bobot Poin NFT (Weight)")} : ${decodedStake.userTotalWeight?.toString() || decodedStake.user_total_weight?.toString()}`);
+    console.log(`⏳ ${p("Durasi Komitmen Lock")} : ${Number(decodedStake.lockDuration || decodedStake.lock_duration) / (24 * 60 * 60)} Hari`);
+    
+    const stakeStartTime = Number(decodedStake.stakeStartTime || decodedStake.stake_start_time);
+    console.log(`🗓️  ${p("Waktu Mulai Staking")} : ${new Date(stakeStartTime * 1000).toLocaleString()}`);
+
+    // 3. Ambil data tracking klaim waktu dari PDA Tracker
+    const trackerAccount = await umi.rpc.getAccount(publicKey(claimTrackerPDA.toBase58()));
+    let lastClaimTimestamp = stakeStartTime; 
+    let lastClaimedEpoch = 0;
+
+    if (trackerAccount.exists) {
+      const decodedTracker: any = coder.decode("UserClaimTracker", Buffer.from(trackerAccount.data));
+      lastClaimedEpoch = Number(decodedTracker.lastClaimedEpoch || decodedTracker.last_claimed_epoch || 0);
+      lastClaimTimestamp = Number(decodedTracker.lastClaimTimestamp || decodedTracker.last_claim_timestamp || stakeStartTime);
+    }
+
+    console.log(`🗓️  ${p("Epoch Terakhir Diklaim")} : ${lastClaimedEpoch === 0 ? "Belum Pernah" : lastClaimedEpoch}`);
+    console.log(`⏳ ${p("Pijakan Klaim Terakhir")} : ${new Date(lastClaimTimestamp * 1000).toLocaleString()}`);
+
+    // 4. Kalkulasi Live Ticking Reward Berjalan (30 Hari Konstan)
+    const currentTime = Math.floor(Date.now() / 1000);
+    const totalSecondsElapsed = currentTime - lastClaimTimestamp;
+    
+    const oneMonthSeconds = 30 * 24 * 60 * 60;
+    const progressFraction = Math.min(1, totalSecondsElapsed / oneMonthSeconds);
+
+    const simulatedMonthlyAllocated = 0.1333; 
+    const liveRewardSol = simulatedMonthlyAllocated * progressFraction;
+
+    console.log(`-------------------------------------------------------`);
+    console.log(`⏱️  ${p("Waktu Berjalan Sim")} : ${totalSecondsElapsed} detik`);
+    console.log(`💰 ${p("Live Unclaim Reward")} : ${liveRewardSol.toFixed(6)} SOL (Progres: ${(progressFraction * 100).toFixed(2)}%)`);
+    console.log(`=======================================================`);
+
   } catch (error) {
-    console.error("Terjadi kendala saat membaca RPC Umi:", error);
+    console.error("❌ Gagal membaca atau men-decode status stake:", error);
   }
 }
 

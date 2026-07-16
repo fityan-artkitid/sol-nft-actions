@@ -4,6 +4,8 @@ import { PublicKey, SystemProgram, Connection, Keypair } from "@solana/web3.js";
 import * as fs from "fs";
 import BN from "bn.js";
 import idl from "../artkit_stake_v1.json" with { type: "json" };
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 async function run() {
     // 1. Parameter Jaringan & Identitas Project Target
@@ -12,9 +14,7 @@ async function run() {
     const projectId = "boschoko99"; // ini gabisa dirubah, soale butuh ini sebagai id
 
     // NFT Collection Address (Bisa disamakan atau diganti baru jika ada migrasi koleksi)
-    const nftCollectionMint = new PublicKey(
-        "8ghCYzMZgRuDQ3YiFbE85yTckNzXYvDuKWyrxeCVdwEK",
-    );
+    const nftCollectionMint = new PublicKey(process.env.NEXT_PUBLIC_COLLECTION_ADDRESS || "");
 
     // 2. Load wallet dari ids.json (Harus wallet yang sama dengan admin pembuat di awal)
     const walletSecretKey = JSON.parse(fs.readFileSync("./ids.json", "utf-8"));
