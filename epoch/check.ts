@@ -5,7 +5,7 @@ import * as fs from "fs";
 import idl from "../artkit_stake_v1.json" with { type: "json" };
 
 async function run() {
-    const RPC_ENDPOINT = "http://127.0.0.1:8899";
+    const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";
     const connection = new Connection(RPC_ENDPOINT, "confirmed");
     
     // Identitas Tenant/Proyek yang ingin dicek

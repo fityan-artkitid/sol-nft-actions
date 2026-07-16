@@ -7,7 +7,7 @@ import idl from "../artkit_stake_v1.json" with { type: "json" };
 
 async function run() {
     // 1. Parameter Jaringan & Identitas Project Target
-    const RPC_ENDPOINT = "http://127.0.0.1:8899";
+    const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";
     const connection = new Connection(RPC_ENDPOINT, "confirmed");
     const projectId = "boschoko99"; // ini gabisa dirubah, soale butuh ini sebagai id
 

@@ -9,7 +9,7 @@ import idl from "../artkit_stake_v1.json" with { type: "json" };
 
 async function run() {
     // PARAMETERNYA
-    const RPC_ENDPOINT = "http://127.0.0.1:8899";
+    const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";
     const projectId = "boschoko99"; // INI BIKIN AJA NGASAL, HARUS UNIK TAPI
     // NFT COLLECTION ADDRESSNYA
     const nftCollectionMint = new PublicKey(
