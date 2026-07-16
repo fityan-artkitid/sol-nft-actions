@@ -13,7 +13,7 @@ async function run() {
     const projectId = "boschoko99"; // INI BIKIN AJA NGASAL, HARUS UNIK TAPI
     // NFT COLLECTION ADDRESSNYA
     const nftCollectionMint = new PublicKey(
-        "8ghCYzMZgRuDQ3YiFbE85yTckNzXYvDuKWyrxeCVdwEK",
+        "8iAoQwkXsnRKm6WunbUzp6nRMYdiS7vRUVSH68rDvZH3",
     );
 
     const connection = new Connection(RPC_ENDPOINT, "confirmed");

@@ -10,7 +10,7 @@ async function run() {
     const connection = new Connection(RPC_ENDPOINT, "confirmed");
     
     // ⚠️ MASUKKAN ID PROJEK CACAT YANG INGIN KAMU HAPUS PERMANEN
-    const projectId = "boschoko"; 
+    const projectId = "boschoko99"; 
 
     // Load Wallet Admin asli pengisi projectConfig
     const walletSecretKey = JSON.parse(fs.readFileSync("./ids.json", "utf-8"));
