@@ -1,0 +1,18 @@
+{
+  "name": "Bos Choko #6",
+  "symbol": "BOSC",
+  "description": "Bos Choko is a trusted seller specializing in premium Channa fish feed, committed to building the ultimate global Channa community. Hold exclusive Bos Choko NFTs to unlock premium community rewards, loyalty benefits, and real-world utility as part of our growing ecosystem.",
+  "image": "https://turbo-gateway.com/a04QyiD-HIut7KFYE7HpI3-tBrTQbJ2j5Ojn1ik_cy0",
+  "external_url": "https://artkit.io",
+  "attributes": [
+    { "trait_type": "Class", "value": "Challenger" },
+    { "trait_type": "Background", "value": "Clear Water Aquascape" },
+    { "trait_type": "Species", "value": "Asiatica" },
+    { "trait_type": "Mental", "value": "Flaring Show" },
+    { "trait_type": "Eye", "value": "Normal" },
+    { "trait_type": "Fin Type", "value": "Semi-highfin" },
+    { "trait_type": "Body Pattern", "value": "WS Pure Pearl" },
+    { "trait_type": "Bars", "value": "Perfect Simet Bars" },
+    { "trait_type": "Base Fish Body", "value": "Normal" }
+  ]
+}

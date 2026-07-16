@@ -3,7 +3,7 @@ import { Program, AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram, Connection, Keypair } from "@solana/web3.js";
 import * as fs from "fs";
 import BN from "bn.js";
-import idl from "./artkit_stake_v1.json" with { type: "json" };
+import idl from "../artkit_stake_v1.json" with { type: "json" };
 
 // CODE INI AKAN GENERATE "Alamat PDA Config Projekmu" JADI DISINI TEMPAT NAMPUNG POOL DARI BAGI BAGI REWARD. TF KE SINI, PER PROJECT BEDA.
 
