@@ -17,7 +17,7 @@ async function transferNFT() {
 
   console.log("process.env.NEXT_PUBLIC_COLLECTION_ADDRESS " +process.env.NEXT_PUBLIC_COLLECTION_ADDRESS)
   // 3. Definisikan alamat NFT dan alamat wallet tujuan
-  const assetAddress = publicKey("6dJ2CPuFKnDKeqGyATRzucVwgHvXGwuPZyUrBCXi8g2i");
+  const assetAddress = publicKey("CQ4Yndr8aYsMasbczXueDw9D3aJD5tSi2BJpexL3oMy8");
   const destinationWallet = publicKey("4LSSc5UkLigkVVZCtrrLS9ePu4ApeWFueQo6ztqk3pHM");
   const collectionAddress = publicKey(process.env.NEXT_PUBLIC_COLLECTION_ADDRESS || "");
 

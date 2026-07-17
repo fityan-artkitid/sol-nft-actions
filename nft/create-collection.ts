@@ -1,4 +1,4 @@
-// execute jalanin ini npx ts-node-esm index.ts
+// execute jalanin ini npx ts-node-esm create-collection.ts
 
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { createCollection, ruleSet } from '@metaplex-foundation/mpl-core'
