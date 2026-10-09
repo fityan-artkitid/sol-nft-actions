@@ -1,6 +1,10 @@
 node_modules
 nftJson
+nftJson-prod
+nftJson-prod-pioneer
 ids.json
+sol-boschoko.json
+pioneer-collection.json
 package-lock.json
 artkit_stake_v1.json
 collection-metadata.json

@@ -17,24 +17,16 @@ dotenv.config({ path: ".env" });
 // Kamu tinggal tambahkan item baru di dalam array ini sesuai kebutuhan
 const nftList = [
   {
-    fileName: "1.json",
-    url: "https://turbo-gateway.com/CsFhdsexIrTw0UiAdQ-3AY9Yir6bfG1hIh2dIllgGII",
+    fileName: "2061.json",
+    url: "https://basc.s3.amazonaws.com/meta/2061.json",
   },
   {
-    fileName: "2.json",
-    url: "https://turbo-gateway.com/F5zKuEFU61wK2VbD6Bwfx9F16wHQF0a4VSx44unvFKs",
+    fileName: "4478.json",
+    url: "https://basc.s3.amazonaws.com/meta/4478.json",
   },
   {
-    fileName: "3.json",
-    url: "https://turbo-gateway.com/YVt-C104fKgvyng63Lq3_cyeYvX3nyVDCei-d0Gjbn0",
-  },
-  {
-    fileName: "4.json",
-    url: "https://turbo-gateway.com/lknb76sDaqN-0L8NRj1U2FAKfCEcqjCAv2i4FXOEgFQ",
-  },
-  {
-    fileName: "5.json",
-    url: "https://turbo-gateway.com/H45JNqg-Z05DiQTaI_lKnqH4df81xHx3FXMqwSxGjQY",
+    fileName: "1954.json",
+    url: "https://basc.s3.amazonaws.com/meta/1954.json",
   }
 ];
 
@@ -80,7 +72,7 @@ async function mintMultipleAssets() {
       const nftNumber = currentNft.fileName.replace(".json", "");
 
       console.log(
-        `\n[${i + 1}/${totalNFT}] Memproses Bos Choko #${nftNumber}...`,
+        `\n[${i + 1}/${totalNFT}] Memproses BASC #${nftNumber}...`,
       );
 
       // Generate keypair baru secara acak khusus untuk alamat unik NFT Core ini
@@ -89,7 +81,7 @@ async function mintMultipleAssets() {
       await create(umi, {
         asset: assetSigner,
         collection: collection,
-        name: `Bos Choko #${nftNumber}`, // Penamaan on-chain otomatis mengikuti angka file
+        name: `BASC #${nftNumber}`, // Penamaan on-chain otomatis mengikuti angka file
         uri: currentNft.url, // Menggunakan URL gateway langsung dari array
         plugins: [
           {
@@ -117,7 +109,7 @@ async function mintMultipleAssets() {
         ],
       }).sendAndConfirm(umi);
 
-      console.log(`✅ Berhasil! NFT Bos Choko #${nftNumber} dicetak.`);
+      console.log(`✅ Berhasil! NFT BASC #${nftNumber} dicetak.`);
       console.log(`   Alamat Mint NFT: ${assetSigner.publicKey.toString()}`);
     }
 

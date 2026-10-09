@@ -1,4 +1,4 @@
-// execute: npx ts-node-esm close-project.ts
+// execute: npx ts-node-esm project/close.ts
 import { Program, AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { PublicKey, Connection, Keypair } from "@solana/web3.js";
 import * as fs from "fs";
@@ -14,7 +14,7 @@ async function run() {
     const projectId = "boschoko99"; 
 
     // Load Wallet Admin asli pengisi projectConfig
-    const walletSecretKey = JSON.parse(fs.readFileSync("./ids.json", "utf-8"));
+    const walletSecretKey = JSON.parse(fs.readFileSync("./sol-boschoko.json", "utf-8"));
     const signerKeypair = Keypair.fromSecretKey(new Uint8Array(walletSecretKey));
 
     const walletWrapper = new Wallet(signerKeypair);

@@ -1,4 +1,4 @@
-// execute: npx ts-node-esm project/check-epochs.ts
+// execute: npx ts-node-esm epoch/check.ts
 import { Program, AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import * as fs from "fs";
@@ -14,7 +14,7 @@ async function run() {
     const targetProjectId = "boschoko99"; 
 
     // Load wallet dummy/admin hanya untuk syarat inisialisasi provider Anchor
-    const walletSecretKey = JSON.parse(fs.readFileSync("./ids.json", "utf-8"));
+    const walletSecretKey = JSON.parse(fs.readFileSync("./sol-boschoko.json", "utf-8"));
     const signerKeypair = Keypair.fromSecretKey(new Uint8Array(walletSecretKey));
     const walletWrapper = new Wallet(signerKeypair);
     
@@ -108,6 +108,26 @@ async function run() {
             console.log(`   ✅ ${p("Sudah Di-klaim User")} : ${totalClaimedSol.toFixed(4)} SOL (${claimsInEpoch.length} NFT)`);
             console.log(`   ⏳ ${p("Sisa Alokasi Terbuka")} : ${remainingRewardSol.toFixed(4)} SOL`);
             console.log(`   🎯 ${p("Snapshot Poin Global")} : ${rawPoints.toString()}`);
+            console.log(`-------------------------------------------------------`);
+        });
+
+        // Filter akun stakeState milik targetProjectId
+        const projectStakeStates = allStakeStates.filter((stake: any) => {
+            return stake.account.projectId === targetProjectId || stake.account.project_id === targetProjectId;
+        });
+
+        console.log(`\n=======================================================`);
+        console.log(`🔒 DAFTAR NFT TER-FREEZE / DI-STAKE (${projectStakeStates.length} NFT)`);
+        console.log(`=======================================================`);
+
+        projectStakeStates.forEach((stake: any, i: number) => {
+            const acc = stake.account;
+            const assetMint = (acc.asset || acc.mint || acc.nftMint as PublicKey).toBase58();
+            const owner = (acc.owner || acc.user as PublicKey).toBase58();
+            
+            console.log(`${i + 1}. Mint NFT: ${assetMint}`);
+            console.log(`   Owner   : ${owner}`);
+            console.log(`   PDA     : ${stake.publicKey.toBase58()}`);
             console.log(`-------------------------------------------------------`);
         });
 

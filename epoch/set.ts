@@ -1,4 +1,4 @@
-// execute: npx ts-node-esm set-epoch.ts
+// execute: npx ts-node-esm epoch/set.ts
 import { Program, AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram, Connection, Keypair } from "@solana/web3.js";
 import * as fs from "fs";
@@ -16,14 +16,14 @@ async function run() {
     const projectId = "boschoko99"; 
     
     // Target Periode Bulanan (Format: YYYYMM)
-    const currentEpochId = 202607;
+    const currentEpochId = 202610;
     
     // Alokasi SOL Hadiah untuk bulan ini (misal: 2.0 SOL)
     // Diubah ke satuan terkecil blockchain (Lamports): 2 * 10^9
-    const allocatedSolAmount = new BN(2 * 1_000_000_000); 
+    const allocatedSolAmount = new BN(1 * 1_000_000_000); 
 
     // 2. Load Wallet Admin dari ids.json
-    const walletSecretKey = JSON.parse(fs.readFileSync("./ids.json", "utf-8"));
+    const walletSecretKey = JSON.parse(fs.readFileSync("./sol-boschoko.json", "utf-8"));
     const signerKeypair = Keypair.fromSecretKey(new Uint8Array(walletSecretKey));
 
     console.log("Alamat Wallet Admin:", signerKeypair.publicKey.toBase58());

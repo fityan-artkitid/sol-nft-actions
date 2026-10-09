@@ -19,7 +19,7 @@ async function run() {
     const connection = new Connection(RPC_ENDPOINT, "confirmed");
 
     // 2. Load wallet dari ids.json
-    const walletSecretKey = JSON.parse(fs.readFileSync("./ids.json", "utf-8"));
+    const walletSecretKey = JSON.parse(fs.readFileSync("./sol-boschoko.json", "utf-8"));
     const signerKeypair = Keypair.fromSecretKey(new Uint8Array(walletSecretKey));
 
     console.log(
@@ -66,7 +66,7 @@ async function run() {
             projectId,
             nftCollectionMint,
             new BN(1500), // min_effective_points (Safe pool divider)
-            new BN(50000000), // Denda kabur awal: 0.05 SOL (dalam lamports)
+            new BN(10000000), // Denda kabur awal: 0.01 SOL (dalam lamports)
             TiersData,
             DurationsData,
         )

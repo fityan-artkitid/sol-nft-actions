@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import bs58 from 'bs58';
 
 // 1. Baca file id.json
-const rawData = fs.readFileSync('./ids.json', 'utf-8');
+const rawData = fs.readFileSync('./sol-boschoko.json', 'utf-8');
 
 // 2. Parse data JSON menjadi array angka (Uint8Array)
 const byteArray = new Uint8Array(JSON.parse(rawData));

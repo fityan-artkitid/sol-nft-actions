@@ -1,4 +1,4 @@
-// execute jalanin ini npx ts-node-esm nft/create-collection.ts
+// execute jalanin ini npx ts-node-esm nft/create-collection_basc.ts
 
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { createCollection, ruleSet } from '@metaplex-foundation/mpl-core'
@@ -28,8 +28,8 @@ const creator1 = publicKey('4LSSc5UkLigkVVZCtrrLS9ePu4ApeWFueQo6ztqk3pHM')
 // Create a new Collection
 await createCollection(umi, {
   collection: collectionSigner,
-  name: 'Snakehead by Bos Choko',
-  uri: 'https://artkit.ar.io/yiOJaG31Rnxw6_8cZFJauFbQZWImvu-8IPmACJ9-KZI',
+  name: 'Bored Ape Solana Club',
+  uri: 'https://arweave.net/7RHTS7Qmre6nv6TvwGX9ZMdMdEQkWxaeOhtjbAj5pfo',
   plugins: [
     {
       type: 'Royalties',

@@ -1,5 +1,5 @@
 
-// execute: npx ts-node-esm project/check-project.ts
+// execute: npx ts-node-esm project/check.ts
 import { Program, AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { PublicKey, Connection, Keypair } from "@solana/web3.js";
 import * as fs from "fs";

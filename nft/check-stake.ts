@@ -10,13 +10,13 @@ import idl from "../artkit_stake_v1.json" with { type: "json" };
 
 dotenv.config({ path: ".env" });
 
-async function checkStakeStatusUmi() {
+async function checkStakeStatusFull() {
   const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8899";
   const PROGRAM_ID = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID || idl.address);
   const CURRENT_PROJECT_ID = process.env.NEXT_PUBLIC_CURRENT_PROJECT_ID || "boschoko99";
   
   // Mint address NFT yang ingin kamu cek
-  const NFT_ASSET_ADDRESS = new PublicKey("3DNsDgmBzvoUSu3vphEScSedyD4dznBZrG4SMj8tKRJQ");
+  const NFT_ASSET_ADDRESS = new PublicKey("4jEeEXadaFAptTpe6D9FzVDic7zQvkpRRTCAJdrUPfjo");
 
   const umi = createUmi(RPC_ENDPOINT).use(mplCore());
 
@@ -28,7 +28,7 @@ async function checkStakeStatusUmi() {
   const date = new Date();
   const currentEpoch = parseInt(`${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}`, 10);
 
-  // Hitung PDA Alamat Akun
+  // 2. Hitung Alamat PDA
   const [projectConfigPDA] = PublicKey.findProgramAddressSync(
     [Buffer.from("project_config"), Buffer.from(CURRENT_PROJECT_ID)],
     PROGRAM_ID
@@ -52,37 +52,58 @@ async function checkStakeStatusUmi() {
   );
 
   const coder = new BorshAccountsCoder(idl as any);
-  const p = (txt: string) => txt.padEnd(25, " ");
+  const p = (txt: string) => txt.padEnd(28, " ");
 
   console.log(`=======================================================`);
-  console.log(`🔍 ${p("NFT Asset")} : ${NFT_ASSET_ADDRESS.toString()}`);
+  console.log(`🔍 ${p("NFT Asset Target")} : ${NFT_ASSET_ADDRESS.toString()}`);
   console.log(`📍 ${p("PDA StakeState")} : ${stakeStatePDA.toBase58()}`);
   console.log(`📍 ${p("PDA ClaimTracker")} : ${claimTrackerPDA.toBase58()}`);
   console.log(`📍 ${p("PDA EpochRewardLog")} : ${epochRewardLogPDA.toBase58()}`);
   console.log(`=======================================================\n`);
 
   try {
-    // 3. Tarik data StakeState
+    // 3. Inspeksi Keberadaan Akun di Chain secara Independen
     const stakeAccount = await umi.rpc.getAccount(publicKey(stakeStatePDA.toBase58()));
+    const trackerAccount = await umi.rpc.getAccount(publicKey(claimTrackerPDA.toBase58()));
+
+    console.log(`📋 INSPEKSI AKUN PDA ON-CHAIN:`);
+    console.log(`   - StakeState   (State Active) : ${stakeAccount.exists ? "✅ ADA (Tersimpan)" : "❌ TIDAK ADA"}`);
+    console.log(`   - ClaimTracker (History Log)  : ${trackerAccount.exists ? "⚠️  ADA (Tersimpan)" : "❌ TIDAK ADA"}`);
+    console.log(`-------------------------------------------------------\n`);
+
+    // KONDISI A: NFT sedang tidak distake
     if (!stakeAccount.exists) {
-      console.log("🔓 STATUS: NFT INI TIDAK SEDANG DI-STAKE (PDA tidak ditemukan).");
+      if (trackerAccount.exists) {
+        console.log("🚨 STATUS: NFT TIDAK SEDANG DI-STAKE (TAPI PERNAH DI-STAKE SEBELUMNYA)");
+        console.log("⚠️  Peringatan: Akun `ClaimTracker` masih menggantung di blockchain.");
+        console.log("👉 Jika kamu me-restake NFT ini tanpa `init_if_needed` di Rust, transaksi akan memicu ERROR 0x0!\n");
+      } else {
+        console.log("🔓 STATUS: NFT INI TERLIHAT BARU (Belum pernah di-stake sama sekali).");
+      }
       return;
     }
 
+    // KONDISI B: NFT sedang distake aktif
     const decodedStake: any = coder.decode("StakeState", Buffer.from(stakeAccount.data));
     const stakeStartTime = Number(decodedStake.stakeStartTime || decodedStake.stake_start_time);
     const nftWeight = Number(decodedStake.userTotalWeight || decodedStake.user_total_weight || 100);
     const lockDuration = Number(decodedStake.lockDuration || decodedStake.lock_duration || 0);
+    
+    const lockEndTime = stakeStartTime + lockDuration;
+    const currentTime = Math.floor(Date.now() / 1000);
+    const isLockExpired = currentTime >= lockEndTime;
 
-    console.log("🔒 STATUS                    : NFT INI SEDANG DI-STAKE!");
+    console.log("🔒 STATUS STAKING              : AKTIF");
     console.log(`-------------------------------------------------------`);
     console.log(`📦 ${p("Project ID Bind")} : ${decodedStake.projectId || decodedStake.project_id}`);
     console.log(`👑 ${p("Wallet Pemilik Sah")} : ${(decodedStake.owner as PublicKey).toBase58()}`);
     console.log(`🎯 ${p("Bobot Poin NFT (Weight)")} : ${nftWeight}`);
     console.log(`⏳ ${p("Durasi Komitmen Lock")} : ${lockDuration / (24 * 60 * 60)} Hari`);
     console.log(`🗓️  ${p("Waktu Mulai Staking")} : ${new Date(stakeStartTime * 1000).toLocaleString()}`);
+    console.log(`🏁 ${p("Batas Akhir Lockup")} : ${new Date(lockEndTime * 1000).toLocaleString()}`);
+    console.log(`🛡️  ${p("Status Bebas Denda")} : ${isLockExpired ? "✅ Ya (Bebas Denda Emergency)" : "⚠️  Belum (Kena Denda jika Unstake)"}`);
 
-    // Tarik data Project Config riil untuk poin global terupdate
+    // Tarik data Project Config riil
     let currentGlobalWeight = 0;
     const configAccount = await umi.rpc.getAccount(publicKey(projectConfigPDA.toBase58()));
     if (configAccount.exists) {
@@ -90,7 +111,7 @@ async function checkStakeStatusUmi() {
       currentGlobalWeight = Number(decodedConfig.totalGlobalWeight || decodedConfig.total_global_weight || 0);
     }
 
-    // 4. Tarik data EpochRewardLog Dinamis dari Blockchain
+    // Tarik data EpochRewardLog Dinamis
     let epochAllocatedSol = 0;
     let epochSettledPoints = 0;
     let isEpochAvailable = false;
@@ -107,11 +128,9 @@ async function checkStakeStatusUmi() {
       }
     }
 
-    // Sinkronisasi Logika Pembagi: Bandingkan Global Weight Aktif vs Poin Minimum di Epoch Log
     const activeGlobalPoints = Math.max(currentGlobalWeight, epochSettledPoints);
 
-    // 5. Tarik data UserClaimTracker
-    const trackerAccount = await umi.rpc.getAccount(publicKey(claimTrackerPDA.toBase58()));
+    // 4. Decode UserClaimTracker
     let lastClaimTimestamp = stakeStartTime; 
     let lastClaimedEpoch = 0;
 
@@ -121,46 +140,43 @@ async function checkStakeStatusUmi() {
       lastClaimTimestamp = Number(decodedTracker.lastClaimTimestamp || decodedTracker.last_claim_timestamp || stakeStartTime);
     }
 
-    console.log(`🗓️  ${p("Epoch Terakhir Diklaim")} : ${lastClaimedEpoch === 0 ? "Belum Pernah" : lastClaimedEpoch}`);
+    console.log(`\n🗓️  ${p("Epoch Terakhir Diklaim")} : ${lastClaimedEpoch === 0 ? "Belum Pernah" : lastClaimedEpoch}`);
     console.log(`⏳ ${p("Pijakan Klaim Terakhir")} : ${new Date(lastClaimTimestamp * 1000).toLocaleString()}`);
-    console.log(`📊 ${p("Status Pool Pembagi")} : ${isEpochAvailable ? `Aktif (Pool: ${epochAllocatedSol} SOL / Settle Pts Terpilih: ${activeGlobalPoints} Pts)` : "Belum Dibuka (Menggunakan Fallback Base Rate)"}`);
+    console.log(`📊 ${p("Status Pool Pembagi")} : ${isEpochAvailable ? `Aktif (Pool: ${epochAllocatedSol} SOL / Settled Pts: ${activeGlobalPoints})` : "Belum Dibuka (Fallback Base Rate)"}`);
 
-    // 6. 🌟 JALANKAN LOGIKA KALKULASI TICKING ADIL (SINKRON ANCHOR V2)
-    const currentTime = Math.floor(Date.now() / 1000);
-    const totalSecondsElapsed = Math.max(0, currentTime - lastClaimTimestamp);
-    
-    // Ekstraksi jumlah hari presisi berdasarkan kode epoch YYYYMM saat ini
+    // 5. Kalkulasi Ticking Simulasi Sesuai Logika Rust Baru
+    // Waktu perhitungan dibatasi oleh lockEndTime agar tidak bocor setelah durasi habis
+    const calculationEndTime = Math.min(currentTime, lockEndTime);
+    const effectiveElapsedSeconds = Math.max(0, calculationEndTime - lastClaimTimestamp);
+
     const year = Math.floor(currentEpoch / 100);
     const month = currentEpoch % 100;
     const daysInMonth = new Date(year, month, 0).getDate(); 
-    const oneMonthSeconds = daysInMonth * 24 * 60 * 60; // Pembagi rata terikat durasi hari bulan ini
+    const oneMonthSeconds = daysInMonth * 24 * 60 * 60;
 
-    // Batasi waktu berjalan berdasarkan komitmen batas penguncian aset NFT
-    const effectiveSeconds = Math.min(totalSecondsElapsed, lockDuration);
-    const progressPercent = (effectiveSeconds / lockDuration) * 100;
+    const lockProgressPercent = Math.min(100, (Math.max(0, currentTime - stakeStartTime) / lockDuration) * 100);
 
     let liveRewardSol = 0;
 
-    if (isEpochAvailable && activeGlobalPoints > 0) {
-      // Jatah revenue share maksimal satu bulan penuh
-      const totalUserShare = (nftWeight * epochAllocatedSol) / activeGlobalPoints;
-      
-      // 🌟 RE-FIX: Aliran tetesan linear dibagi dengan total detik bulan berjalan (bukan durasi lock)
-      liveRewardSol = (totalUserShare * effectiveSeconds) / oneMonthSeconds;
-    } else {
-      // Fallback Base Rate jika Log Epoch belum di-set admin
-      const totalDaysElapsed = effectiveSeconds / (24 * 60 * 60);
-      let baseRate = 0.001;
-      if (decodedStake.nftClass === "Champion") baseRate = 0.0015;
-      if (decodedStake.nftClass === "Grand Champion") baseRate = 0.0025;
-      if (decodedStake.nftClass === "Immortal") baseRate = 0.005;
-      liveRewardSol = totalDaysElapsed * baseRate;
+    if (effectiveElapsedSeconds > 0) {
+      if (isEpochAvailable && activeGlobalPoints > 0) {
+        const totalUserShare = (nftWeight * epochAllocatedSol) / activeGlobalPoints;
+        liveRewardSol = (totalUserShare * effectiveElapsedSeconds) / oneMonthSeconds;
+      } else {
+        const totalDaysElapsed = effectiveElapsedSeconds / (24 * 60 * 60);
+        let baseRate = 0.001;
+        if (decodedStake.nftClass === "Champion") baseRate = 0.0015;
+        if (decodedStake.nftClass === "Grand Champion") baseRate = 0.0025;
+        if (decodedStake.nftClass === "Immortal") baseRate = 0.005;
+        liveRewardSol = totalDaysElapsed * baseRate;
+      }
     }
 
     console.log(`-------------------------------------------------------`);
     console.log(`📆 ${p("Jumlah Hari Bulan Ini")} : ${daysInMonth} Hari (${oneMonthSeconds} detik)`);
-    console.log(`⏱️  ${p("Waktu Berjalan Sim")} : ${totalSecondsElapsed} detik`);
-    console.log(`💰 ${p("Live Unclaim Reward")} : ${liveRewardSol.toFixed(9)} SOL (Progres Lock: ${progressPercent.toFixed(4)}%)`);
+    console.log(`⏱️  ${p("Waktu Klaim Efektif")} : ${effectiveElapsedSeconds} detik (Dari sisa kuota lockup)`);
+    console.log(`💰 ${p("Live Unclaim Reward")} : ${liveRewardSol.toFixed(9)} SOL`);
+    console.log(`📈 ${p("Progres Masa Lockup")} : ${lockProgressPercent.toFixed(2)}% ${isLockExpired ? "(SELESAI)" : "(BERJALAN)"}`);
     console.log(`=======================================================`);
 
   } catch (error) {
@@ -168,4 +184,4 @@ async function checkStakeStatusUmi() {
   }
 }
 
-checkStakeStatusUmi();
+checkStakeStatusFull();
